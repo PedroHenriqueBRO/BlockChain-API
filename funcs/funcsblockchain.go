@@ -93,28 +93,6 @@ func NewBlock(Data string) Block {
 
 }
 
-func AddBlockGenesis() {
-	//adiciona o primeiro bloco da blockchain em blocos.json
-	arq, err := os.Open("arquivo/blocos.json")
-	if err != nil {
-		fmt.Println("Arquivo nao aberto")
-	}
-	blocos := BlockChain{}
-	err = json.NewDecoder(arq).Decode(&blocos.Block)
-	if err != nil {
-		fmt.Println("Erro")
-	}
-	b := NewBlock("Data Genesis")
-	blocos.Block = append(blocos.Block, b)
-	vetor, err := json.MarshalIndent(blocos.Block, "", " ")
-	if err != nil {
-		fmt.Println("Erro")
-	}
-	err = os.WriteFile("arquivo/blocos.json", vetor, 0644)
-	if err != nil {
-		fmt.Println("erro")
-	}
-}
 func Addblockjson(Data string) {
 	//adiciona os demais blocos em blocos.json
 	b := NewBlock(Data)

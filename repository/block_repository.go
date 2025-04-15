@@ -3,6 +3,7 @@ package repository
 import (
 	"block-chain/model"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 )
@@ -23,14 +24,19 @@ func (br *Blockrepository) GetBlocks() ([]model.Block, error) {
 	}
 	var blockList []model.Block
 	var blockOBJ model.Block
+	var prevHashStr, dataStr, hashStr string
+
 	for row.Next() {
 		err := row.Scan(
-			&blockOBJ.Previoushash,
-			&blockOBJ.Data,
+			&prevHashStr,
+			&dataStr,
 			&blockOBJ.Timestamp,
-			&blockOBJ.Hash,
+			&hashStr,
 			&blockOBJ.Nonce,
 		)
+		blockOBJ.Previoushash, _ = hex.DecodeString(prevHashStr)
+		blockOBJ.Hash, _ = hex.DecodeString(hashStr)
+		blockOBJ.Data, _ = hex.DecodeString(dataStr)
 		if err != nil {
 			return []model.Block{}, err
 		}
@@ -44,15 +50,21 @@ func (br *Blockrepository) GetBlocks() ([]model.Block, error) {
 func (br *Blockrepository) InsertBlock(block model.Block) (model.Block, error) {
 	query, err := br.connection.Prepare("INSERT INTO Block" + "(previoushash,dados,timestampp,hash,nonce )" + "VALUES ($1,$2,$3,$4,$5)")
 	if err != nil {
-		fmt.Println("aqui query")
 		return model.Block{}, err
 	}
 	_, err = query.Exec(fmt.Sprintf("%x", block.Previoushash), fmt.Sprintf("%x", block.Data), block.Timestamp, fmt.Sprintf("%x", block.Hash), block.Nonce)
 	if err != nil {
-		fmt.Println("aqui", err)
 		return model.Block{}, errors.New("Erro")
 	}
 	query.Close()
 	return block, nil
+
+}
+func (br *Blockrepository) Deleteall() error {
+	_, err := br.connection.Exec("Delete from Block")
+	if err != nil {
+		return err
+	}
+	return err
 
 }

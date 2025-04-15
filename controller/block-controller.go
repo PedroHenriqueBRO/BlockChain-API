@@ -40,3 +40,11 @@ func (b *BlockController) InsertBlock(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, insertedblock)
 
 }
+
+func (b *BlockController) Deleteall(ctx *gin.Context) {
+	err := b.Blockusecase.Deleteall()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+
+	}
+}

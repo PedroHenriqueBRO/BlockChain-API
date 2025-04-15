@@ -24,3 +24,6 @@ func (bu *Blockusecase) InsertBlock(b model.Block) (model.Block, error) {
 	return block, nil
 
 }
+func (bu *Blockusecase) Deleteall() error {
+	return bu.Repository.Deleteall()
+}

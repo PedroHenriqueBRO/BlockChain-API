@@ -47,7 +47,7 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 	var hash [32]byte //gera um slice de tamanho 32 de byte para armazenar hash
 	nonce := 0        //um contador para ir somando com os dados do bloco pow
 
-	for nonce < maxNonce {
+	for int64(nonce) < maxNonce {
 		data := pow.Gethash(nonce) //pega os dados do pow e faz dados+nonce=hash e armazena em data
 		hash = sha256.Sum256(data) //hash recebe um checksum de data para armazenar em forma de um slice de byte com 32 de tamanho
 		hashInt.SetBytes(hash[:])  //recebe o slice de hash e o interpreta em um big int que nesse caso é o hashInt que vai ter o valor interpreta de [32]byte em forma de big.Int

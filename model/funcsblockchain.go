@@ -1,4 +1,4 @@
-package funcs
+package model
 
 import (
 	"bytes"

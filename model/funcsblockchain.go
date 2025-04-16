@@ -4,11 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/json"
-	"fmt"
 	"math"
 	"math/big"
-	"os"
 	"time"
 )
 
@@ -62,59 +59,12 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 	return nonce, hash[:]
 }
 
-func NewBlock(Data string) Block {
-	//função usada para criar um novo bloco usando o ProofOfWork e pow.Run() para gerar o nonce e hash do bloco para retornar e armazenar no blocos.json
-	arq, err := os.Open("arquivo/blocos.json")
-	if err != nil {
-		fmt.Println("Arquivo nao aberto")
-	}
-	blocos := BlockChain{}
-	err = json.NewDecoder(arq).Decode(&blocos.Block)
-	if err != nil {
-		fmt.Println("Blocos.json vazio, adicionando o primeiro bloco!!!")
-	}
-	if len(blocos.Block) != 0 {
-		block := Block{Timestamp: time.Now().Unix(), Previoushash: blocos.Block[len(blocos.Block)-1].Hash, Data: []byte(Data)}
-		pow := NewProofOfWork(&block)
-		nonce, hash := pow.Run()
-
-		block.Hash = hash[:]
-		block.Nonce = nonce
-		return block
-	} else {
-		block := Block{Timestamp: time.Now().Unix(), Previoushash: []byte(""), Data: []byte(Data)}
-		pow := NewProofOfWork(&block)
-		nonce, hash := pow.Run()
-
-		block.Hash = hash[:]
-		block.Nonce = nonce
-		return block
-	}
-
-}
-
-func Addblockjson(Data string) {
-	//adiciona os demais blocos em blocos.json
-	b := NewBlock(Data)
-	arq, err := os.Open("arquivo/blocos.json")
-	if err != nil {
-		fmt.Println("Arquivo nao aberto")
-	}
-	blocos := BlockChain{}
-	err = json.NewDecoder(arq).Decode(&blocos.Block)
-	if err != nil {
-		fmt.Println("Blocos.json vazio, adicionando o primeiro bloco!!!")
-	}
-	blocos.Block = append(blocos.Block, b)
-	vetor, err := json.MarshalIndent(blocos.Block, "", " ")
-	if err != nil {
-		fmt.Println("Erro")
-	}
-	err = os.WriteFile("arquivo/blocos.json", vetor, 0644)
-	if err != nil {
-		fmt.Println("erro")
-	}
-
+func (b *Block) NewBlock() {
+	// para colocar o bloco no banco de dados ja foi pego o data no json e o previoushash pelo Getblocks() utilizando o ultimo bloco, agora é preencher o resto dos blocos
+	//com a logica de NewBlock()
+	b.Timestamp = time.Now().Unix()
+	pow := NewProofOfWork(b)
+	b.Nonce, b.Hash = pow.Run()
 }
 func (pow *ProofOfWork) Gethash(nonce int) []byte {
 	//gera o hash que é a junção dos campos data, PreviousHash , timestamp , nonce e o targetbits que é retornado como um []byte
@@ -138,6 +88,31 @@ func IntToHex(n int64) []byte {
 	binary.BigEndian.PutUint64(buff, uint64(n)) //pega o buff que vai armazenar o uint64(int64 n) em forma de []byte
 	return buff
 }
+
+/*func Addblockjson(Data string) {
+	//adiciona os demais blocos em blocos.json
+	b := NewBlock(Data)
+	arq, err := os.Open("arquivo/blocos.json")
+	if err != nil {
+		fmt.Println("Arquivo nao aberto")
+	}
+	blocos := BlockChain{}
+	err = json.NewDecoder(arq).Decode(&blocos.Block)
+	if err != nil {
+		fmt.Println("Blocos.json vazio, adicionando o primeiro bloco!!!")
+	}
+	blocos.Block = append(blocos.Block, b)
+	vetor, err := json.MarshalIndent(blocos.Block, "", " ")
+	if err != nil {
+		fmt.Println("Erro")
+	}
+	err = os.WriteFile("arquivo/blocos.json", vetor, 0644)
+	if err != nil {
+		fmt.Println("erro")
+	}
+
+}
+
 func Listblocks() {
 	//lista os blocos do json
 	arq, err := os.Open("arquivo/blocos.json")
@@ -158,7 +133,7 @@ func Listblocks() {
 
 //Daqui para baixo é uma versao antiga utilizando lista ligada simples de Blocks
 
-/*func (b *BlockChain) Addblock(Index int, Data string, Timestamp string) {
+func (b *BlockChain) Addblock(Index int, Data string, Timestamp string) {
 	bn := &Block{Index: Index, Data: Data, Timestamp: Timestamp, Proximo: nil}
 	if b.Initialblock == nil {
 		bn.Previoushash = ""
@@ -178,8 +153,8 @@ func Listblocks() {
 		aux = aux.Proximo
 	}
 
-}*/
-/*func (b *BlockChain) Listblocks() {
+}
+func (b *BlockChain) Listblocks() {
 	var aux *Block
 	aux = b.Initialblock
 	for {
@@ -192,8 +167,8 @@ func Listblocks() {
 		}
 
 	}
-}*/
-/*func (b *BlockChain) Init() {
+}
+func (b *BlockChain) Init() {
 	(b).Initialblock = nil
 
 }*/

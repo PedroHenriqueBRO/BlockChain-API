@@ -1,16 +1,23 @@
-FROM golang:1.24.2
+### Step 1: Baixar dependenciar e compilar o binario
+FROM golang:1.24.2 AS stage1
 
-# set working directory
-WORKDIR /go/src/app
+WORKDIR /app
 
-# Copy the source code
-COPY . . 
+# Copia o go.mod e faz o download das dependencias.
+COPY go.mod go.sum ./
+RUN go mod download
 
-#EXPOSE the port
-EXPOSE 8000
+# Copia o código da aplicação e compila o binario.
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o meuExecutavel cmd/main.go
+################################################
 
-# Build the Go app
-RUN go build -o main cmd/main.go
+### Step 2: Copiar o binario do stage anterior para a imagem final.
+FROM scratch
 
-# Run the executable
-CMD ["./main"]
+# Copia apenas o binario gerado no stage anterior.
+COPY --from=stage1 /app/meuExecutavel /
+
+# Define o ponto de entrada para o container como /meuExecutavel.
+# O binario será executado quando o container for iniciado.
+ENTRYPOINT ["/meuExecutavel"]

@@ -40,13 +40,13 @@ func (b *BlockController) InsertBlock(ctx *gin.Context) {
 	if err != nil {
 		fmt.Println("Nao foi possível passar de JSON para Block")
 	}
-	blocos, err := b.Blockusecase.GetBlocks()
+	bloco, err := b.Blockusecase.GetLastBlock()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
 	block.Data = []byte(aux.Aux)
-	block.Previoushash = blocos[len(blocos)-1].Hash
+	block.Previoushash = bloco.Hash
 	block.NewBlock()
 	insertedblock, err := b.Blockusecase.InsertBlock(block)
 	if err != nil {
@@ -75,6 +75,15 @@ func (bu *BlockController) GetByHash(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
-	ctx.JSON(http.StatusCreated, blocos)
+	ctx.JSON(http.StatusOK, blocos)
+
+}
+
+func (bu *BlockController) GetLastBlock(ctx *gin.Context) {
+	bloco, err := bu.Blockusecase.GetLastBlock()
+	if err != nil {
+		fmt.Println(err)
+	}
+	ctx.JSON(http.StatusOK, bloco)
 
 }

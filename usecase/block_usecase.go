@@ -30,3 +30,6 @@ func (bu *Blockusecase) Deleteall() error {
 func (bu *Blockusecase) GetByHash(aux string) ([]model.Block, error) {
 	return bu.Repository.GetByHash(aux)
 }
+func (bu *Blockusecase) GetLastBlock() (model.Block, error) {
+	return bu.Repository.GetLastBlock()
+}

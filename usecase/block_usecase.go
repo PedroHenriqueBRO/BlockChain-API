@@ -27,3 +27,6 @@ func (bu *Blockusecase) InsertBlock(b model.Block) (model.Block, error) {
 func (bu *Blockusecase) Deleteall() error {
 	return bu.Repository.Deleteall()
 }
+func (bu *Blockusecase) GetByHash(aux string) ([]model.Block, error) {
+	return bu.Repository.GetByHash(aux)
+}

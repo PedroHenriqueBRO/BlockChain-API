@@ -65,6 +65,36 @@ func (br *Blockrepository) Deleteall() error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
+
+}
+
+func (br *Blockrepository) GetByHash(aux string) ([]model.Block, error) {
+	query := "SELECT previoushash,dados,timestampp,hash,nonce FROM Block WHERE dados=" + fmt.Sprintf("'%x'", []byte(aux))
+	row, err := br.connection.Query(query)
+	if err != nil {
+		return []model.Block{}, err
+	}
+	var blockList []model.Block
+	var blockOBJ model.Block
+	var prevHashStr, dataStr, hashStr string
+	for row.Next() {
+		err = row.Scan(
+			&prevHashStr,
+			&dataStr,
+			&blockOBJ.Timestamp,
+			&hashStr,
+			&blockOBJ.Nonce,
+		)
+		if err != nil {
+			fmt.Println("Erro no scan")
+		}
+		blockOBJ.Previoushash, _ = hex.DecodeString(prevHashStr)
+		blockOBJ.Hash, _ = hex.DecodeString(hashStr)
+		blockOBJ.Data, _ = hex.DecodeString(dataStr)
+		blockList = append(blockList, blockOBJ)
+	}
+	row.Close()
+	return blockList, nil
 
 }

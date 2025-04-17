@@ -5,6 +5,7 @@ import (
 	"block-chain/usecase"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,6 +31,9 @@ func (b *BlockController) GetBlocks(ctx *gin.Context) {
 
 }
 func (b *BlockController) InsertBlock(ctx *gin.Context) {
+
+	defer time.Sleep(time.Second * 2)
+
 	var block model.Block
 	aux := Stringaux{}
 	err := ctx.BindJSON(&aux)
@@ -59,4 +63,18 @@ func (b *BlockController) Deleteall(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, err)
 
 	}
+}
+func (bu *BlockController) GetByHash(ctx *gin.Context) {
+	aux := Stringaux{}
+	err := ctx.BindJSON(&aux)
+	if err != nil {
+		fmt.Println("Nao foi possível passar de JSON para Block")
+	}
+	blocos, err := bu.Blockusecase.GetByHash(aux.Aux)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	ctx.JSON(http.StatusCreated, blocos)
+
 }

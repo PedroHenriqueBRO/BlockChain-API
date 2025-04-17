@@ -98,3 +98,22 @@ func (br *Blockrepository) GetByHash(aux string) ([]model.Block, error) {
 	return blockList, nil
 
 }
+func (br *Blockrepository) GetLastBlock() (model.Block, error) {
+	query := "SELECT * FROM Block ORDER BY timestampp DESC LIMIT 1"
+	row := br.connection.QueryRow(query)
+	var blockOBJ model.Block
+	var prevHashStr, dataStr, hashStr string
+
+	row.Scan(
+		&prevHashStr,
+		&dataStr,
+		&blockOBJ.Timestamp,
+		&hashStr,
+		&blockOBJ.Nonce,
+	)
+	blockOBJ.Previoushash, _ = hex.DecodeString(prevHashStr)
+	blockOBJ.Hash, _ = hex.DecodeString(hashStr)
+	blockOBJ.Data, _ = hex.DecodeString(dataStr)
+
+	return blockOBJ, nil
+}
